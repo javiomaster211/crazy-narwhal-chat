@@ -8,5 +8,9 @@ export interface IUserRepository {
     hashedPassword: string,
     name: string,
     role: string,
+  ): Promise<AuthUser>;
+  validateCredentials(
+    email: string,
+    plainPassword: string,
   ): Promise<AuthUser | null>;
 }
