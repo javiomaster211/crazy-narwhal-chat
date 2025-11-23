@@ -1,20 +1,23 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Inject } from '@nestjs/common';
 import { AuthUser } from '../../domain/entities/auth-user.entity';
 import { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { RegisterDto } from '../dto/register.dto';
-import bcrypt from 'bcrypt';
+import { hash } from 'bcrypt';
 import { UserRole } from '../../domain/enums/user-role.enum';
 
 @Injectable()
 export class RegisterUseCase {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(
+    @Inject('IUserRepository')
+    private userRepository: IUserRepository,
+  ) {}
   async execute(dto: RegisterDto): Promise<AuthUser | null> {
     const existingUser = await this.userRepository.findByEmail(dto.email);
     if (existingUser) {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hashedPassword = await hash(dto.password, 10);
 
     const user = await this.userRepository.create(
       dto.email,
